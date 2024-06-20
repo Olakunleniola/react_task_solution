@@ -6,6 +6,11 @@ import AdminDashboardPage from "./pages/AdminDashboardPage";
 import AdminLoginPage from "./pages/AdminLoginPage";
 import NotFoundPage from "./pages/NotFoundPage";
 
+function ProtectedRoute({ children }) {
+  const { state } = React.useContext(AuthContext);
+  return state.isAuthenticated ? children : <Navigate to="/admin/login" />;
+}
+
 function renderRoutes(role) {
   switch (role) {
     case "admin":
@@ -13,19 +18,22 @@ function renderRoutes(role) {
         <Routes>
           <Route
             path="/admin/dashboard"
-            element={<AdminDashboardPage />}
-          ></Route>
+            element={
+              <ProtectedRoute>
+                <AdminDashboardPage />
+              </ProtectedRoute>
+            }
+          />
+          <Route path="*" element={<Navigate to="/admin/dashboard" />} />
         </Routes>
       );
-      break;
     default:
       return (
         <Routes>
-          <Route exact path="/admin/login" element={<AdminLoginPage />}></Route>
-          <Route path="*" exact element={<NotFoundPage />}></Route>
+          <Route exact path="/admin/login" element={<AdminLoginPage />} />
+          <Route path="*" element={<NotFoundPage />} />
         </Routes>
       );
-      break;
   }
 }
 
@@ -37,9 +45,7 @@ function Main() {
       <div className="flex w-full">
         <div className="w-full">
           <div className="page-wrapper w-full py-10 px-5">
-            {!state.isAuthenticated
-              ? renderRoutes("none")
-              : renderRoutes(state.role)}
+            {renderRoutes(state.role)}
           </div>
         </div>
       </div>

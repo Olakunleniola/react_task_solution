@@ -14,7 +14,53 @@ export default function MkdSDK() {
   };
   
   this.login = async function (email, password, role) {
-    //TODO
+    // the login request API endpoint 
+    const url = "https://reacttask.mkdlabs.com/v2/api/lambda/login";
+  
+    // the request headers 
+    const headers = {
+      "Content-Type": "application/json",
+      "x-project": "cmVhY3R0YXNrOmQ5aGVkeWN5djZwN3p3OHhpMzR0OWJtdHNqc2lneTV0Nw=="
+    };
+  
+    // the request body
+    const body = {
+      email: email,
+      password: password,
+      role: role
+    };
+  
+    // use the try....catch block to handle async request and error
+    try {
+      const response = await fetch(url, {
+        method: "POST",
+        headers: headers,
+        body: JSON.stringify(body)
+      });
+  
+      if (!response.ok) {
+        throw new Error("Bad Request");
+      }
+  
+      const data = await response.json();
+  
+      if (data.error) {
+        throw new Error("An Error Occurred: Login Failed");
+      }
+  
+      // return the required data
+      return {
+        error: data.error,
+        role: data.role,
+        token: data.token,
+        expire_at: data.expire_at,
+        user_id: data.user_id
+      };
+  
+    } catch (err) {
+      console.log("An Error Occurred: ", err); //log the error
+      throw err;  // throw the error
+    }
   };
 
   this.getHeader = function () {
@@ -86,8 +132,33 @@ export default function MkdSDK() {
     }
   };  
 
-  this.check = async function (role) {
+  this.check = async function (role, token) {
     //TODO
+    // api end point to validate token
+    const url = "https://reacttask.mkdlabs.com/v2/api/lambda/check";
+    // request headers
+    const headers = {
+      "x-project": "cmVhY3R0YXNrOmQ5aGVkeWN5djZwN3p3OHhpMzR0OWJtdHNqc2lneTV0Nw==",
+      "Authorization": `Bearer ${token}`
+    }
+
+    // Request Body
+    const body = {
+      role: role
+    }
+
+    try { 
+      const response = await fetch(url, {method: "POST", body: JSON.stringify(body), headers: headers});
+      // check response status
+      if(response.status === 200) {
+        return true
+      } else {
+        return false
+      }
+    }catch(err) {
+      console.log("An Error Occurred", err);
+      throw err;
+    }
   };
 
   return this;
