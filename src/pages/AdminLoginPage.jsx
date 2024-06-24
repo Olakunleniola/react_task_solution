@@ -1,12 +1,10 @@
-import React, { useContext } from "react";
+import React, { useContext, useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { yupResolver } from "@hookform/resolvers/yup";
 import * as yup from "yup";
 import MkdSDK from "../utils/MkdSDK";
 import { useNavigate } from "react-router-dom";
 import { AuthContext } from "../authContext";
-// import the SnackBar component
-import SnackBar from "../components/SnackBar";
 // import globalContext
 import { GlobalContext, showToast } from "../globalContext";
 
@@ -19,9 +17,10 @@ const AdminLoginPage = () => {
       password: yup.string().required(),
     })
     .required();
-  // // Use GlobalContext
+  
+    // Use GlobalContext
   const { state: globalState, dispatch: globalDispatch } = useContext(GlobalContext); 
-  const { dispatch } = React.useContext(AuthContext);
+  const {state, dispatch } = React.useContext(AuthContext);
   const navigate = useNavigate();
   const {
     register,
@@ -45,14 +44,14 @@ const AdminLoginPage = () => {
         return;
       }
 
-      console.log(loginResponse)
       // Check if the token is valid
-      // const checkTokenValid = await sdk.check('admin', loginResponse.token);
+      const checkTokenValid = await sdk.check('admin', loginResponse.token);
       // check for token validity error
-      // if (!checkTokenValid) {
-      //   setError('email', { type: 'manual', message: 'Token validation failed' });
-      //   return;
-      // }
+      if (!checkTokenValid) {
+        setError('email', { type: 'manual', message: 'Token validation failed' });
+        showToast(globalDispatch, 'Token Validation Error');
+        return;
+      }
       
       // Save to local storage
       localStorage.setItem('token', loginResponse.token);
@@ -74,10 +73,10 @@ const AdminLoginPage = () => {
       // Show snackbar
       showToast(globalDispatch, 'Logged in successfully!');
 
-      // Navigate to the dashboard or appropriate page
+      // Navigate to the dashboard
       setTimeout(() => {
-        navigate('/admin/dashboard');  // Adjust the path as needed
-      }, 3000);
+        navigate('/admin/dashboard');  
+      }, 2000);
 
     } catch (error) {
       console.error('An error occurred:', error);
@@ -88,7 +87,6 @@ const AdminLoginPage = () => {
 
   return (
     <div className="w-full max-w-xs mx-auto">
-      <SnackBar/>
       <form
         onSubmit={handleSubmit(onSubmit)}
         className="bg-white shadow-md rounded px-8 pt-6 pb-8 mb-4 mt-8 "

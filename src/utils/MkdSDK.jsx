@@ -2,7 +2,7 @@ export default function MkdSDK() {
   this._baseurl = "https://reacttask.mkdlabs.com";
   this._project_id = "reacttask";
   this._secret = "d9hedycyv6p7zw8xi34t9bmtsjsigy5t7";
-  this._table = "";
+  this._table = "video";
   this._custom = "";
   this._method = "";
 
@@ -20,7 +20,7 @@ export default function MkdSDK() {
     // the request headers 
     const headers = {
       "Content-Type": "application/json",
-      "x-project": "cmVhY3R0YXNrOmQ5aGVkeWN5djZwN3p3OHhpMzR0OWJtdHNqc2lneTV0Nw=="
+      "x-project": base64Encode
     };
   
     // the request body
@@ -65,7 +65,7 @@ export default function MkdSDK() {
 
   this.getHeader = function () {
     return {
-      Authorization: "Bearer " + localStorage.getItem("token"),
+      "Authorization": "Bearer " + localStorage.getItem("token"),
       "x-project": base64Encode,
     };
   };
@@ -78,7 +78,7 @@ export default function MkdSDK() {
     const header = {
       "Content-Type": "application/json",
       "x-project": base64Encode,
-      Authorization: "Bearer " + localStorage.getItem("token"),
+      "Authorization": "Bearer " + localStorage.getItem("token"),
     };
 
     switch (method) {
@@ -109,6 +109,7 @@ export default function MkdSDK() {
         if (!payload.limit) {
           payload.limit = 10;
         }
+
         const paginateResult = await fetch(
           this._baseurl + `/v1/api/rest/${this._table}/${method}`,
           {
@@ -139,27 +140,27 @@ export default function MkdSDK() {
     // request headers
     const headers = {
       "x-project": "cmVhY3R0YXNrOmQ5aGVkeWN5djZwN3p3OHhpMzR0OWJtdHNqc2lneTV0Nw==",
-      "Authorization": `Bearer ${token}`
-    }
-
+      "Authorization": `Bearer ${token}`,
+      "Content-Type": "application/json"
+    };
     // Request Body
-    const body = {
-      role: role
-    }
-
+    const body = {role: role}
     try { 
       const response = await fetch(url, {method: "POST", body: JSON.stringify(body), headers: headers});
       // check response status
-      if(response.status === 200) {
+      const data = await response.json()
+      if(!data.error) {
         return true
-      } else {
-        return false
       }
+      return false
+    
     }catch(err) {
       console.log("An Error Occurred", err);
       throw err;
     }
   };
+
+  
 
   return this;
 }
